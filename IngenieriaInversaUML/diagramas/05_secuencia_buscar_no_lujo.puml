@@ -1,0 +1,71 @@
+@startuml DS03-BuscarVehiculoNoLujoso
+' Escenario CU03: el usuario elige categoria "Non-Luxury" y un tipo (Car/Suv) y pulsa Search.
+title DS03 - Buscar vehiculo no lujoso
+
+actor Usuario as U
+participant "openButton:\nJButton" as OB
+participant "objButtonHandler:\nButtonHandler" as BH
+participant "frame:\nAutoSearchUI" as F
+participant "lblCarNameValue:\nJLabel" as L
+participant "VehicleFactory\n(static)" as VF
+participant "vf:\nCARVehicleFactory" as FC
+participant "vf:\nSUVVehicleFactory" as FS
+participant "vf:\nBYCICLEVehicleFactory" as FB
+participant "s: NonLuxuryCAR" as PC
+participant "s: NonLuxurySUV" as PS
+participant "s: NonLuxuryBYCICLE" as PB
+
+U -> OB : pulsar "Search" (Alt+S)
+OB -> BH : actionPerformed(e)
+activate BH
+opt e.getActionCommand().equals(SEARCH)
+  BH -> F : getSelectedCategory()
+  F --> BH : "Non-Luxury"
+  BH -> F : getSelectedType()
+  F --> BH : vhType
+  BH -> VF : getVehicleFactory(vhType)
+  alt vhType == CAR  (o valor por defecto)
+    VF -> FC ** : new CARVehicleFactory()
+  else vhType == SUV
+    VF -> FS ** : new SUVVehicleFactory()
+  else vhType == BYCICLE
+    VF -> FB ** : new BYCICLEVehicleFactory()
+  end
+  VF --> BH : vf
+  opt vhCategory.equals(NON_LUXURY)
+    alt vf es CARVehicleFactory  (despacho polimorfico)
+      BH -> FC : getNonLuxury()
+      FC -> PC ** : new NonLuxuryCAR("NonLuxuryL-Car")
+      FC --> BH : s
+      BH -> PC : getNLName()
+      PC --> BH : "NonLuxuryL-Car"
+      BH -> PC : getNLFeatures()
+      PC --> BH : "Non-Luxury CAR Features "
+    else vf es SUVVehicleFactory
+      BH -> FS : getNonLuxury()
+      FS -> PS ** : new NonLuxurySUV("Non-Luxury-SUV")
+      FS --> BH : s
+      BH -> PS : getNLName()
+      PS --> BH : "Non-Luxury-SUV"
+      BH -> PS : getNLFeatures()
+      PS --> BH : "Non-Luxury SUV Features "
+    else vf es BYCICLEVehicleFactory
+      BH -> FB : getNonLuxury()
+      FB -> PB ** : new NonLuxuryBYCICLE("NonLuxuryL-Bycicle")
+      FB --> BH : s
+      BH -> PB : getNLName()
+      PB --> BH : "NonLuxuryL-Bycicle"
+      BH -> PB : getNLFeatures()
+      PB --> BH : "Non-Luxury BYCICLE Features "
+    end
+  end
+  BH -> F : setResult(searchResult)
+  F -> L : setText(searchResult)
+end
+deactivate BH
+
+note right of BH
+  El nombre del producto Car "NonLuxuryL-Car" tiene una "L" de mas:
+  es un error del codigo original, se representa tal cual.
+end note
+@enduml

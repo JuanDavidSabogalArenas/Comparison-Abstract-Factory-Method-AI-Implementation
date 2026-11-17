@@ -1,0 +1,39 @@
+@startuml DCU01-CasosDeUso
+' Diagrama de casos de uso recuperado por ingenieria inversa
+' Proyecto: AbstractFactoryReverseExample (Java SE + Swing)
+' Fuente del comportamiento: AutoSearchUI.java (clases AutoSearchUI y ButtonHandler)
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Usuario" as U
+
+rectangle "Sistema: Abstract Factory - Example (AutoSearchUI)" {
+  usecase "CU01 - Buscar vehiculo" as CU01
+  usecase "CU02 - Buscar vehiculo de lujo" as CU02
+  usecase "CU03 - Buscar vehiculo no lujoso" as CU03
+  usecase "CU04 - Obtener criterios de busqueda" as CU04  usecase "CU05 - Mostrar resultado de busqueda" as CU05
+  usecase "CU06 - Salir de la aplicacion" as CU06
+}
+
+U --> CU01
+U --> CU06
+
+CU02 --|> CU01
+CU03 --|> CU01
+
+CU01 ..> CU04 : <<include>>
+CU01 ..> CU05 : <<include>>
+
+note bottom of CU01
+  Disparado por el boton "Search" (Alt+S).
+  ButtonHandler.actionPerformed lee la categoria y el tipo,
+  obtiene la fabrica con VehicleFactory.getVehicleFactory(tipo),
+  crea el producto y arma "Name: <n>  Features: <f>".
+end note
+
+note bottom of CU06
+  Dos disparadores:
+  - boton "Exit" (Alt+X)  -> System.exit(1)
+  - cerrar la ventana     -> AutoSearchUI$1.windowClosing -> System.exit(0)
+end note
+@enduml

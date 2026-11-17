@@ -1,0 +1,72 @@
+@startuml DS02-BuscarVehiculoLujo
+' Escenario CU02: el usuario elige categoria "Luxury" y un tipo (Car/Suv) y pulsa Search.
+title DS02 - Buscar vehiculo de lujo
+
+actor Usuario as U
+participant "openButton:\nJButton" as OB
+participant "objButtonHandler:\nButtonHandler" as BH
+participant "frame:\nAutoSearchUI" as F
+participant "lblCarNameValue:\nJLabel" as L
+participant "VehicleFactory\n(static)" as VF
+participant "vf:\nCARVehicleFactory" as FC
+participant "vf:\nSUVVehicleFactory" as FS
+participant "vf:\nBYCICLEVehicleFactory" as FB
+participant "c: LuxuryCAR" as PC
+participant "c: LuxurySUV" as PS
+participant "c: LuxuryBYCICLE" as PB
+
+U -> OB : pulsar "Search" (Alt+S)
+OB -> BH : actionPerformed(e)
+activate BH
+opt e.getActionCommand().equals(SEARCH)
+  BH -> F : getSelectedCategory()
+  F --> BH : "Luxury"
+  BH -> F : getSelectedType()
+  F --> BH : vhType
+  BH -> VF : getVehicleFactory(vhType)
+  alt vhType == CAR  (o valor por defecto)
+    VF -> FC ** : new CARVehicleFactory()
+  else vhType == SUV
+    VF -> FS ** : new SUVVehicleFactory()
+  else vhType == BYCICLE
+    VF -> FB ** : new BYCICLEVehicleFactory()
+  end
+  VF --> BH : vf
+  opt vhCategory.equals(LUXURY)
+    alt vf es CARVehicleFactory  (despacho polimorfico)
+      BH -> FC : getLuxury()
+      FC -> PC ** : new LuxuryCAR("Luxury-Car")
+      FC --> BH : c
+      BH -> PC : getLuxuryName()
+      PC --> BH : "Luxury-Car"
+      BH -> PC : getLuxuryFeatures()
+      PC --> BH : "Luxury Car Features "
+    else vf es SUVVehicleFactory
+      BH -> FS : getLuxury()
+      FS -> PS ** : new LuxurySUV("Luxury-SUV")
+      FS --> BH : c
+      BH -> PS : getLuxuryName()
+      PS --> BH : "Luxury-SUV"
+      BH -> PS : getLuxuryFeatures()
+      PS --> BH : "Luxury SUV Features "
+    else vf es BYCICLEVehicleFactory
+      BH -> FB : getLuxury()
+      FB -> PB ** : new LuxuryBYCICLE("Luxury-Bycicle")
+      FB --> BH : c
+      BH -> PB : getLuxuryName()
+      PB --> BH : "Luxury-Bycicle"
+      BH -> PB : getLuxuryFeatures()
+      PB --> BH : "Luxury Bycicle Features "
+    end
+  end
+  BH -> F : setResult(searchResult)
+  F -> L : setText(searchResult)
+end
+deactivate BH
+
+note right of BH
+  searchResult = "Name: " + nombre + "  Features: " + caracteristicas
+  ButtonHandler solo conoce VehicleFactory y Luxury:
+  la clase concreta del producto depende de la fabrica devuelta.
+end note
+@enduml

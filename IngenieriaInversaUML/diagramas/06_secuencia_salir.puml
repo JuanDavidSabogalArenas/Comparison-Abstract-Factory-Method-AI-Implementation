@@ -1,0 +1,29 @@
+@startuml DS04-SalirAplicacion
+' Escenario CU06: dos formas de terminar la aplicacion.
+title DS04 - Salir de la aplicacion
+
+actor Usuario as U
+participant "exitButton:\nJButton" as EB
+participant ":ButtonHandler\n(objAutoSearchUI=null)" as BH
+participant "frame:\nAutoSearchUI" as F
+participant ":AutoSearchUI$1" as WA
+participant "System\n(static)" as S
+
+alt el usuario pulsa el boton "Exit"
+  U -> EB : pulsar "Exit" (Alt+X)
+  EB -> BH : actionPerformed(e)
+  opt e.getActionCommand().equals(EXIT)
+    BH -> S : exit(1)
+  end
+else el usuario cierra la ventana
+  U -> F : cerrar ventana (WINDOW_CLOSING)
+  F -> WA : windowClosing(e)
+  WA -> S : exit(0)
+end
+
+note right of S
+  El codigo de salida difiere: 1 con el boton Exit y 0 al cerrar la ventana.
+  El manejador del boton Exit no tiene referencia a la vista (null);
+  solo funciona porque la rama EXIT no la usa.
+end note
+@enduml

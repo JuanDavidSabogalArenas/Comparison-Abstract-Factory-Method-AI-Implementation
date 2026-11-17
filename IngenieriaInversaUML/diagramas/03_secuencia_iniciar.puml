@@ -1,0 +1,49 @@
+@startuml DS01-IniciarAplicacion
+' Flujo de arranque: AutoSearchUI.main construye la ventana y la muestra.
+' Se omiten por abstraccion: JLabel, JPanel, GridBagLayout/Constraints y
+' SwingUtilities.updateComponentTreeUI (no intervienen en la logica).
+title DS01 - Iniciar la aplicacion
+
+actor Usuario as U
+participant "AutoSearchUI\n(static main)" as M
+participant "frame:\nAutoSearchUI" as F
+participant "cmbVehicleCategory:\nJComboBox" as CC
+participant "cmbVehicleType:\nJComboBox" as CT
+participant "openButton:\nJButton" as OB
+participant "exitButton:\nJButton" as EB
+participant "objButtonHandler:\nButtonHandler" as BH
+participant ":ButtonHandler\n(Exit, objAutoSearchUI=null)" as BH2
+participant ":AutoSearchUI$1" as WA
+
+U -> M : main(args)
+activate M
+M -> F ** : new AutoSearchUI()
+activate F
+F -> CC ** : new JComboBox()
+F -> CC : addItem(LUXURY)
+F -> CC : addItem(NON_LUXURY)
+F -> CT ** : new JComboBox()
+F -> CT : addItem(VehicleFactory.CAR)
+F -> CT : addItem(VehicleFactory.SUV)
+F -> CT : addItem(VehicleFactory.BYCICLE)
+F -> OB ** : new JButton(SEARCH)
+F -> OB : setMnemonic(VK_S)
+F -> EB ** : new JButton(EXIT)
+F -> EB : setMnemonic(VK_X)
+F -> BH ** : new ButtonHandler(this)
+F -> OB : addActionListener(objButtonHandler)
+F -> BH2 ** : new ButtonHandler()
+F -> EB : addActionListener(new ButtonHandler())
+F --> M : frame
+deactivate F
+M -> WA ** : new AutoSearchUI$1()
+M -> F : addWindowListener(windowAdapter)
+M -> F : setSize(1050, 600)
+M -> F : setVisible(true)
+deactivate M
+
+note right of M
+  main() crea la GUI fuera del hilo de eventos (EDT):
+  no usa SwingUtilities.invokeLater.
+end note
+@enduml

@@ -1,0 +1,159 @@
+@startuml DC01-Clases
+' Diagrama de clases recuperado por ingenieria inversa
+' Proyecto: AbstractFactoryReverseExample (Java SE + Swing), paquete por defecto
+' Patron: Abstract Factory
+skinparam classAttributeIconSize 0
+
+' ===================== Productos abstractos =====================
+interface Luxury {
+  +getLuxuryName(): String
+  +getLuxuryFeatures(): String
+}
+interface NonLuxury {
+  +getNLName(): String
+  +getNLFeatures(): String
+}
+
+' ===================== Productos concretos =====================
+class LuxuryCAR {
+  -name: String
+  +LuxuryCAR(cName: String)
+  +getLuxuryName(): String
+  +getLuxuryFeatures(): String
+}
+class LuxurySUV {
+  -name: String
+  +LuxurySUV(sName: String)
+  +getLuxuryName(): String
+  +getLuxuryFeatures(): String
+}
+class NonLuxuryCAR {
+  -name: String
+  +NonLuxuryCAR(sName: String)
+  +getNLName(): String
+  +getNLFeatures(): String
+}
+class NonLuxurySUV {
+  -name: String
+  +NonLuxurySUV(sName: String)
+  +getNLName(): String
+  +getNLFeatures(): String
+}
+class LuxuryBYCICLE {
+  -name: String
+  +LuxuryBYCICLE(cName: String)
+  +getLuxuryName(): String
+  +getLuxuryFeatures(): String
+}
+class NonLuxuryBYCICLE {
+  -name: String
+  +NonLuxuryBYCICLE(sName: String)
+  +getNLName(): String
+  +getNLFeatures(): String
+}
+
+' ===================== Fabrica abstracta y concretas =====================
+abstract class VehicleFactory {
+  +{static} CAR: String = "Car"
+  +{static} SUV: String = "Suv"
+  +{static} BYCICLE: String = "Bycicle"
+  +{abstract} getLuxury(): Luxury
+  +{abstract} getNonLuxury(): NonLuxury
+  +{static} getVehicleFactory(type: String): VehicleFactory
+}
+class CARVehicleFactory {
+  +getLuxury(): LuxuryCAR
+  +getNonLuxury(): NonLuxuryCAR
+}
+class SUVVehicleFactory {
+  +getLuxury(): LuxurySUV
+  +getNonLuxury(): NonLuxurySUV
+}
+class BYCICLEVehicleFactory {
+  +getLuxury(): LuxuryBYCICLE
+  +getNonLuxury(): NonLuxuryBYCICLE
+}
+
+' ===================== Cliente / GUI =====================
+class AutoSearchUI {
+  +{static} newline: String = "\n"
+  +{static} SEARCH: String = "Search"
+  +{static} EXIT: String = "Exit"
+  +{static} LUXURY: String = "Luxury"
+  +{static} NON_LUXURY: String = "Non-Luxury"
+  -cmbVehicleCategory: JComboBox
+  -cmbVehicleType: JComboBox
+  -lblVehicleCategory: JLabel
+  -lblVehicleType: JLabel
+  -lblCarName: JLabel
+  -lblCarNameValue: JLabel
+  +AutoSearchUI()
+  +{static} main(args: String[]): void
+  +getSelectedCategory(): String
+  +getSelectedType(): String
+  +setResult(searchResult: String): void
+}
+class ButtonHandler {
+  +actionPerformed(e: ActionEvent): void
+  +ButtonHandler()
+  +ButtonHandler(inObjAutoSearchUI: AutoSearchUI)
+}
+class "AutoSearchUI$1" as Anon <<anonymous>> {
+  +windowClosing(e: WindowEvent): void
+}
+
+' ===================== Tipos externos (Java SE) =====================
+class JFrame <<library>>
+abstract class WindowAdapter <<library>>
+interface ActionListener <<library>>
+
+' ===================== Relaciones =====================
+LuxuryCAR ..|> Luxury
+LuxurySUV ..|> Luxury
+LuxuryBYCICLE ..|> Luxury
+NonLuxuryCAR ..|> NonLuxury
+NonLuxurySUV ..|> NonLuxury
+NonLuxuryBYCICLE ..|> NonLuxury
+
+CARVehicleFactory --|> VehicleFactory
+SUVVehicleFactory --|> VehicleFactory
+BYCICLEVehicleFactory --|> VehicleFactory
+
+AutoSearchUI --|> JFrame
+Anon --|> WindowAdapter
+ButtonHandler ..|> ActionListener
+
+' Asociacion: ButtonHandler conoce a la vista (0..1 porque el ctor sin args la deja null)
+ButtonHandler "*" --> "0..1 objAutoSearchUI" AutoSearchUI
+
+AutoSearchUI ..> ButtonHandler : <<create>>
+AutoSearchUI ..> Anon : <<create>>
+AutoSearchUI ..> VehicleFactory : <<use>> (CAR / SUV)
+
+ButtonHandler ..> VehicleFactory : <<use>>
+ButtonHandler ..> Luxury : <<use>>
+ButtonHandler ..> NonLuxury : <<use>>
+
+VehicleFactory ..> CARVehicleFactory : <<create>>
+VehicleFactory ..> SUVVehicleFactory : <<create>>
+VehicleFactory ..> BYCICLEVehicleFactory : <<create>>
+CARVehicleFactory ..> LuxuryCAR : <<create>>
+CARVehicleFactory ..> NonLuxuryCAR : <<create>>
+SUVVehicleFactory ..> LuxurySUV : <<create>>
+SUVVehicleFactory ..> NonLuxurySUV : <<create>>
+BYCICLEVehicleFactory ..> LuxuryBYCICLE : <<create>>
+BYCICLEVehicleFactory ..> NonLuxuryBYCICLE : <<create>>
+
+note as N1
+  Patron Abstract Factory
+  - Fabrica abstracta: VehicleFactory
+  - Fabricas concretas: CARVehicleFactory, SUVVehicleFactory, BYCICLEVehicleFactory
+  - Productos abstractos: Luxury, NonLuxury
+  - Productos concretos: LuxuryCAR, LuxurySUV, LuxuryBYCICLE,
+    NonLuxuryCAR, NonLuxurySUV, NonLuxuryBYCICLE
+  - Cliente: ButtonHandler (con la vista AutoSearchUI)
+  getVehicleFactory(type) elige la fabrica concreta;
+  por defecto devuelve CARVehicleFactory.
+end note
+N1 .. VehicleFactory
+@enduml
